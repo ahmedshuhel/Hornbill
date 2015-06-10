@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/ahmedshuhel/Hornbill</projectUrl>
+    <iconUrl>https://github.com/ahmedshuhel/Hornbill/blob/master/hornbill.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial Release</releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>Common Enterprise Application EntityFramework</tags>
+  </metadata>
+</package>
