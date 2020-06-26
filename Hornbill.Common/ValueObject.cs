@@ -5,84 +5,67 @@ using System.Reflection;
 
 namespace Hornbill.Common
 {
-    public abstract class ValueObject<T> : IEquatable<T>
-        where T : ValueObject<T>
+    public abstract class ValueObject<T> : IEquatable<T> where T : ValueObject<T>
     {
         public virtual bool Equals(T other)
         {
             if (other == null)
                 return false;
 
-            var t = GetType();
-            var otherType = other.GetType();
+            var type1 = GetType();
+            var type2 = other.GetType();
 
-            if (t != otherType)
+            if (type1 != type2)
                 return false;
 
-            var fields = t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-            foreach (var field in fields)
+            foreach (var field in type1.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                var value1 = field.GetValue(other);
-                var value2 = field.GetValue(this);
-
-
-                if (value1 == null)
+                var obj1 = field.GetValue(other);
+                var obj2 = field.GetValue(this);
+                if (obj1 == null)
                 {
-                    if (value2 != null)
+                    if (obj2 != null)
                         return false;
                 }
-
-                else if (!value1.Equals(value2))
+                else if (!obj1.Equals(obj2))
+                {
                     return false;
+                }
             }
-
             return true;
         }
 
         public override bool Equals(object obj)
         {
-            if (obj == null)
+            if (obj == null) return false;
+
+            var type1 = GetType();
+            var type2 = obj.GetType();
+
+            if (type1 != type2)
                 return false;
 
-
-            var other = obj as T;
-            return Equals(other);
+            return Equals(obj as T);
         }
 
         public override int GetHashCode()
         {
-            var fields = GetFields();
-            const int startValue = 17;
-            const int multiplier = 59;
-
-            return fields.Select(field => field.GetValue(this))
-                .Where(value => value != null)
-                .Aggregate(startValue, (current, value) => current*multiplier + value.GetHashCode());
+            return GetFields().Select(field => field.GetValue(this)).Where(value => value != null)
+                .Aggregate(17, (current, value) => current * 59 + value.GetHashCode());
         }
 
-        private IEnumerable<FieldInfo> GetFields()
+        IEnumerable<FieldInfo> GetFields()
         {
-            var t = GetType();
-            var fields = new List<FieldInfo>();
-
-            while (t != typeof (object))
-            {
-                fields.AddRange(t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public));
-                t = t.BaseType;
-            }
-
-            return fields;
+            var type = GetType();
+            var fieldInfoList = new List<FieldInfo>();
+            for (; type != typeof(object); type = type.BaseType)
+                fieldInfoList.AddRange(
+                    type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic));
+            return fieldInfoList;
         }
 
-        public static bool operator ==(ValueObject<T> x, ValueObject<T> y)
-        {
-            return x.Equals(y);
-        }
+        public static bool operator ==(ValueObject<T> x, ValueObject<T> y) => x.Equals(y);
 
-        public static bool operator !=(ValueObject<T> x, ValueObject<T> y)
-        {
-            return !(x == y);
-        }
+        public static bool operator !=(ValueObject<T> x, ValueObject<T> y) => !(x == y);
     }
 }

@@ -9,8 +9,36 @@ namespace Hornbill.Common
         private int? _oldHashCode;
         public TKey Id { get; protected set; }
 
+        public virtual bool IsTransient
+        {
+            get
+            {
+                if (Id is Guid)
+                    return (Guid) TypeDescriptor.GetConverter(Id).ConvertFrom(Id.ToString()) ==
+                           Guid.Empty;
+
+                double testDouble;
+
+                if (double.TryParse(Id.ToString(), out testDouble))
+                    return
+                        (double) TypeDescriptor.GetConverter(typeof(double)).ConvertFrom(Id.ToString()) == 0d;
+
+                if (Id.GetType() == typeof(string))
+                    return
+                        (string) TypeDescriptor.GetConverter(Id).ConvertFrom(Id.ToString()) ==
+                        string.Empty;
+
+                //if we get this far, we have a non-GUID, non-numeric, non string identity type and this is unsupported, so throw...
+                throw new ArgumentException(
+                    "ValueObject<TObject, TIdentity> Class only provides native support for Guid, Numeric (Int, Int32, Int64, Double, etc.) or String as the TIdentity type.  For other types (including any custom types), you *must* override the IsTransient virtual property to provide your own implementation!",
+                    "TIdentity");
+            }
+        }
+
         public override bool Equals(object obj)
         {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
             var other = obj as T;
             if (other == null)
                 return false;
@@ -35,44 +63,12 @@ namespace Hornbill.Common
                 _oldHashCode = base.GetHashCode();
                 return _oldHashCode.Value;
             }
+
             return Id.GetHashCode();
         }
 
-        public static bool operator ==(Entity<T, TKey> x, Entity<T, TKey> y)
-        {
-            return Equals(x, y);
-        }
+        public static bool operator ==(Entity<T, TKey> x, Entity<T, TKey> y) => Equals(x, y);
 
-        public static bool operator !=(Entity<T, TKey> x, Entity<T, TKey> y)
-        {
-            return !(x == y);
-        }
-
-        public virtual bool IsTransient
-        {
-            get
-            {
-                if (Id.GetType() == typeof(Guid))
-                    return (Guid)TypeDescriptor.GetConverter(Id).ConvertFrom(Id.ToString()) ==
-                           Guid.Empty;
-
-                double testDouble;
-
-                if (Double.TryParse(Id.ToString(), out testDouble))
-                    return
-                        (double)TypeDescriptor.GetConverter(typeof(double)).ConvertFrom(Id.ToString()) ==
-                        0d;
-
-                if (Id.GetType() == (typeof(string)))
-                    return
-                        (string)TypeDescriptor.GetConverter(Id).ConvertFrom(Id.ToString()) ==
-                        String.Empty;
-
-                //if we get this far, we have a non-GUID, non-numeric, non string identity type and this is unsupported, so throw...
-                throw new ArgumentException(
-                    "IdentityPersistenceBase<TObject, TIdentity> Class only provides native support for Guid, Numeric (Int, Int32, Int64, Double, etc.) or String as the TIdentity type.  For other types (including any custom types), you *must* override the IsTransient virtual property to provide your own implementation!",
-                    "TIdentity");
-            }
-        }
+        public static bool operator !=(Entity<T, TKey> x, Entity<T, TKey> y) => !(x == y);
     }
 }
