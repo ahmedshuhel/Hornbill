@@ -11,8 +11,8 @@
     <iconUrl>https://github.com/ahmedshuhel/Hornbill/blob/master/hornbill.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Initial Release</releaseNotes>
-    <copyright>Copyright 2015</copyright>
+    <releaseNotes>https://github.com/ahmedshuhel/Hornbill</releaseNotes>
+    <copyright>Copyright 2020</copyright>
     <tags>Common Enterprise Application EntityFramework</tags>
   </metadata>
 </package>
